@@ -129,9 +129,9 @@ include_directories(
 )
 
 ## Declare a C++ library
-#add_library(mysensorfusionlibrary #don't forget to name your library
-   #src/sensor_fusion.cpp #
-#)
+add_library(myfusionlibrary 	# do not forget to name your library!
+   src/filter_classes.cpp
+)
 
 ## Add cmake target dependencies of the library
 ## as an example, code may need to be generated before libraries
@@ -156,7 +156,7 @@ add_executable(filterer src/filterer.cpp)
 #add_dependencies(cpplistener sensor_fusion_generate_messages_cpp
 
 ## Specify libraries to link a library or executable target against
-target_link_libraries(filterer ${catkin_LIBRARIES})
+target_link_libraries(filterer ${catkin_LIBRARIES} myfusionlibrary)		# do not forget to add your own library name here !
 
 
 #############
