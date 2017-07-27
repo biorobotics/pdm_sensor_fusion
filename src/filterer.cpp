@@ -14,7 +14,7 @@
 int main(int argc, char **argv)
 {
 
-  ros::init(argc, argv, "listener");
+  ros::init(argc, argv, "filterer");
   ros::NodeHandle n;
 
   // Kalman Filtering 1D jumping: 
@@ -36,40 +36,36 @@ int main(int argc, char **argv)
 
 
   // Motion-Model 1 : 1D Constant velocity 
-  callbackclass momod1D_1; 
-  momod1D_1.name.data = "1D Model1 - constant velocity";
+  KalmanFilter_1D model1D_1(1,1);  
 
-  momod1D_1.F << 1.0, dt, 0.0, 1.0;
+  model1D_1.F << 1.0, dt, 0.0, 1.0;
+  model1D_1.Q << sigma_proc, 0, 0, sigma_proc; 
+  model1D_1.R = sigma_meas; 
 
-  momod1D_1.Q << sigma_proc, 0, 0, sigma_proc; 
-  momod1D_1.R << sigma_meas, 0, 0, sigma_meas; 
-
+/*
   // Motion-Model 2 : 1D Ballistic 
-  callbackclass momod1D_2; 
-  momod1D_2.name.data = "1D Model2 - ballistic";
+  KalmanFilter_1D model1D_2(2,1); 
 
-  momod1D_2.F << 1.0, dt, 0.0, 1.0;
-  momod1D_2.u << -g*0.5*dt*dt, -g*dt; 
-
-  momod1D_2.Q << sigma_proc, 0, 0, sigma_proc; 
-  momod1D_2.R << sigma_meas, 0, 0, sigma_meas;
+  model1D_2.F << 1.0, dt, 0.0, 1.0;
+  model1D_2.u << -g*0.5*dt*dt, -g*dt; 
+  model1D_2.Q << sigma_proc, 0, 0, sigma_proc; 
+  model1D_2.R = sigma_meas;
 
   // Motion-Model 3: 1D Spring-Mass
-  callbackclass momod1D_3; 
-  momod1D_3.name.data = "1D Model3 - spring & mass";
+  KalmanFilter_1D model1D_3(3,1); 
 
-  momod1D_3.F << cos(w*dt), sin(w*dt)/w, -w*sin(w*dt), cos(w*dt); 
-  momod1D_3.u << leq*(1 - cos(w*dt) - sin(w*dt)/w), leq*(1 + w*sin(w*dt) - cos(w*dt));
+  model1D_3.F << cos(w*dt), sin(w*dt)/w, -w*sin(w*dt), cos(w*dt); 
+  model1D_3.u << leq*(1 - cos(w*dt) - sin(w*dt)/w), leq*(1 + w*sin(w*dt) - cos(w*dt));
+  model1D_1.Q << sigma_proc, 0, 0, sigma_proc; 
+  model1D_1.R = sigma_meas;   
 
-  momod1D_1.Q << sigma_proc, 0, 0, sigma_proc; 
-  momod1D_1.R << sigma_meas, 0, 0, sigma_meas;   
-
-
+*/
   // Callback function(s): ---------------------------------------------------------------------------------
-  ros::Subscriber sub1 = n.subscribe("pose_chatter2", 100, &callbackclass::myCb, &momod1D_1);
-  ros::Subscriber sub2 = n.subscribe("pose_chatter2", 100, &callbackclass::myCb, &momod1D_2);
-  ros::Subscriber sub3 = n.subscribe("pose_chatter2", 100, &callbackclass::myCb, &momod1D_3);
-
+  ros::Subscriber sub1 = n.subscribe("pose_chatter1", 100, &KalmanFilter_1D::myCb, &model1D_1);
+ /* 
+  ros::Subscriber sub2 = n.subscribe("pose_chatter2", 100, &KalmanFilter_1D::myCb, &model1D_2);
+  ros::Subscriber sub3 = n.subscribe("pose_chatter2", 100, &KalmanFilter_1D::myCb, &model1D_3);
+*/
   while (ros::ok())
   {
 	  	ros::spinOnce();

@@ -2,82 +2,104 @@
 
 using namespace std; 
 
-
-
 /// Constructor
-callbackclass::callbackclass(void) 
+KalmanFilter_1D::KalmanFilter_1D(int model_id, int object_id) 
 {
-	std::cout<< "Info: Object callbackclass is being created." << std::endl;
+	id_ = object_id; 
+	model_id_ = model_id;
+
+	// Header initialisations
+	z_info_previous_.seq 	= -1;
+	z_info_current_.seq 	= -1; 
+	timestamp_in_.seq 		= -1; 
+	timestamp_out_.seq 		= -1;
+
+	z_info_previous_.stamp 	= ros::Time::now();
+	z_info_current_.stamp 	= z_info_previous_.stamp;
+	timestamp_in_.stamp 	= z_info_previous_.stamp; 
+	timestamp_out_.stamp 	= z_info_previous_.stamp; 
+
+
+	// KF structure initialisation 
+	x << Eigen::Vector2f::Zero(2); 
+	P << 1000*Eigen::Matrix2f::Identity(2,2); 
+	u << Eigen::Vector2f::Zero(2);  
+	z = 0.0; 
 	
-	// Initialisation
-
-	name.data = "_"; 
-
-	seqID_previous = 0; 
-	seqID_current = 0;
-
-	x_previous << Eigen::Vector2f::Zero(2); 
-	x_current << Eigen::Vector2f::Zero(2); 
-
-	P_previous << 1000* Eigen::Matrix2f::Identity(2,2); 
-	P_current << 1000* Eigen::Matrix2f::Identity(2,2); 
-
 	F << Eigen::Matrix2f::Identity(2,2); 
 	B << Eigen::Matrix2f::Identity(2,2); 
-	H << Eigen::Matrix2f::Identity(2,2);  
 	Q << Eigen::Matrix2f::Identity(2,2); 
-	R << Eigen::Matrix2f::Identity(2,2); 
-	u << Eigen::Vector2f::Zero(2);  
 
+	H << 1.0, 0.0;  
+	R = 1.0; 
+
+	cout<< "{Info} \tKalmanFilter_1D initialized (model_id = " << model_id_<< ", object_id = "<< id_ << ")." << endl;
 }
 
 /// Destructor 
-callbackclass::~callbackclass(void)
+KalmanFilter_1D::~KalmanFilter_1D(void)
 {
-	std::cout << "Info: Object callbackclass is being deleted." << std::endl; 
+	cout << "{Info} \tObject KalmanFilter_1D is being deleted." << endl; 
 }
 
 /// Member function(s)
-void callbackclass::myCb(const geometry_msgs::PoseWithCovarianceStamped::ConstPtr& msg)
+void KalmanFilter_1D::myCb(const geometry_msgs::PoseWithCovarianceStamped::ConstPtr& msg)
 {
-	// Storing current measurement in vector
-	Eigen::Vector2f z_current; 
-	z_current << msg->pose.pose.position.z, 0; 
+	timestamp_in_.stamp = ros::Time::now(); 
+	timestamp_in_.seq 	= msg->header.seq; 
+	timestamp_out_.seq 	= msg->header.seq; 
 
-	// Local variables: 
+	z_info_current_ = msg->header;
+	z = msg->pose.pose.position.z; 
 
+	ros::Duration z_Dt = z_info_current_.stamp - z_info_previous_.stamp;
+	double z_dt = z_Dt.toSec(); 
+
+	// Local variables (to avoid aliasing):
 	Eigen::Vector2f x_temp;
 	Eigen::Matrix2f P_temp;  
 
-	Eigen::Vector2f innov; 
-	Eigen::Matrix2f S; 
-	Eigen::Matrix2f K; 
-	
 	// Prediction Step
-	x_temp = F*x_previous + B*u; 
-	P_temp = F*P_previous*F.transpose() + Q; 
+	x_temp = F*x + B*u; 
+	P_temp = F*P*F.transpose() + Q; 
 
-	
 	// Update Step 
-	innov = z_current - H*x_temp; 
+	y_pre = z - H*x_temp; 
 	S = R + H*P_temp*H.transpose();
-	K = P_temp*H.transpose()*S.inverse();
-	 
-	x_current = x_temp + K*innov; 	
-	P_current = (Eigen::Matrix2f::Identity(2,2) - K*H)*P_temp;
+	K = P_temp*H.transpose()/S; 						//K = P_temp*H.transpose()*S.inverse();
+
+	x = x_temp + K*y_pre; 	
+	P = (Eigen::Matrix2f::Identity(2,2) - K*H)*P_temp;
+	y_post = z - H*x; 
+	
 
 	// Print information
-	std::cout << "Name: \t" << name.data.c_str() << std::endl; 
-	std::cout << "Sequence ID \t previous/current:\t" << seqID_previous << "/" << seqID_current << std::endl; 
-	std::cout << "z_current:\n" << z_current << std::endl; 
-  	std::cout << "x_current:\n" << x_current << "\n" << std::endl; 
-  	 
-  	// Shifting the state vector and covariance as well as IDs
-  	x_previous = x_current; 
-  	P_previous = P_current; 
+	/*
+	cout << "\nModel_id:" << model_id_ << " Object_id: "<< id_ << endl;
+	cout << z_info_current_ << endl; 
+	cout << "z \n" << z << endl; 
+	cout << "x \n" << x << endl;
+	cout << "det(P) \n" << P.determinant() << endl; 
+	cout << "y_post \n" << y_post << endl; 
+	*/
 
-  	seqID_previous = seqID_current; 
-	seqID_current = msg->header.seq;
+	// Shifting information
+  	z_info_previous_ = z_info_current_;    
+
+
+	timestamp_out_.stamp = ros::Time::now(); 
+	ros::Duration processing_Dt = timestamp_out_.stamp - timestamp_in_.stamp;
+	double processing_dt = processing_Dt.toSec(); 
+
+
+	cout << "-------" << z_info_current_.seq << endl; 
+
+	cout << z_Dt << endl;
+	cout << z_dt << endl;
+
+	cout << processing_Dt << endl;
+	cout << processing_dt << endl;
+	 
 }
 
 
