@@ -3,6 +3,7 @@
 
 #include <ros/ros.h>
 #include <std_msgs/String.h>
+#include <std_msgs/Float32MultiArray.h>
 #include <geometry_msgs/PoseWithCovarianceStamped.h>
 
 #include <Eigen/Core> 
@@ -20,6 +21,9 @@ public:
 	// Identification & Headers
 	int id_; 							// object id
 	int model_id_; 
+
+	ros::Publisher pub_pose_;
+	ros::Publisher pub_kfmsg_;
 
 	std_msgs::Header z_info_previous_; 
 	std_msgs::Header z_info_current_; 
@@ -48,7 +52,7 @@ public:
 	float y_pre; 						// innovation (pre-fit)
 	float y_post; 						// innovation (post-fit)
 	float S; 							// innovation covariance
-	Eigen::Matrix<float, 2, 1> K; 		// Kalman Gain
+	Eigen::Vector2f K; 					// Kalman Gain
 
 
 	// Member functions
@@ -58,26 +62,5 @@ public:
 	KalmanFilter_1D(int model_id, int object_id);
 	~KalmanFilter_1D();
 }; 
-
-/*
-class callbackclass {
-public: 
-	
-	int model_id_; 						// id_ associated with type of model 
-
-	std_msgs::Header header_vo_; 
-	std_msgs::Header header_in_; 
-	std_msgs::Header header_out_; 
-
-	KalmanFilter_1D kf_1D_;  
-
-	// Callback function 
-	void myCb(const geometry_msgs::PoseWithCovarianceStamped::ConstPtr& msg);
-
-	// Constructor & Destructor
-	callbackclass();
-	~callbackclass();
-};
-*/
 
 #endif // FILTER_CLASSES_H_

@@ -15,8 +15,13 @@ int main(int argc, char **argv)
 {
 
   ros::init(argc, argv, "filterer");
-  ros::NodeHandle n;
 
+  ros::NodeHandle n1;
+  //ros::NodeHandle n2;
+  //ros::NodeHandle n3;
+
+
+  
   // Kalman Filtering 1D jumping: 
 
   // paramters 
@@ -61,10 +66,10 @@ int main(int argc, char **argv)
 
 */
   // Callback function(s): ---------------------------------------------------------------------------------
-  ros::Subscriber sub1 = n.subscribe("pose_chatter1", 100, &KalmanFilter_1D::myCb, &model1D_1);
+  ros::Subscriber sub1 = n1.subscribe("pose_chatter1", 100, &KalmanFilter_1D::myCb, &model1D_1);
  /* 
-  ros::Subscriber sub2 = n.subscribe("pose_chatter2", 100, &KalmanFilter_1D::myCb, &model1D_2);
-  ros::Subscriber sub3 = n.subscribe("pose_chatter2", 100, &KalmanFilter_1D::myCb, &model1D_3);
+  ros::Subscriber sub2 = n2.subscribe("pose_chatter2", 100, &KalmanFilter_1D::myCb, &model1D_2);
+  ros::Subscriber sub3 = n3.subscribe("pose_chatter2", 100, &KalmanFilter_1D::myCb, &model1D_3);
 */
   while (ros::ok())
   {
