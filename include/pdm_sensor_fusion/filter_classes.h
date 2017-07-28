@@ -54,9 +54,19 @@ public:
 	float S; 							// innovation covariance
 	Eigen::Vector2f K; 					// Kalman Gain
 
+	// Model parameters; 
+	float dt_; 
+	float g_; 
+	float w_; 
+	float leq_;
+
 
 	// Member functions
 	void myCb(const geometry_msgs::PoseWithCovarianceStamped::ConstPtr& msg);
+	void initialize_noise(float sigma_process1, float sigma_process2, float sigma_measurement);
+	void update_sigma_z(float sigma_z); // same as sigma_measurement, but may not be constant (can come from vision)
+	void update_process_model(void);
+	void set_model_parameters(float dt, float g, float w, float leq);
 
 	// Constructor & Destructor
 	KalmanFilter_1D(int model_id, int object_id);

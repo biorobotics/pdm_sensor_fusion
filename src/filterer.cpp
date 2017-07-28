@@ -17,60 +17,52 @@ int main(int argc, char **argv)
   ros::init(argc, argv, "filterer");
 
   ros::NodeHandle n1;
-  //ros::NodeHandle n2;
-  //ros::NodeHandle n3;
+  ros::NodeHandle n2;
+  ros::NodeHandle n3;
 
 
-  
+
   // Kalman Filtering 1D jumping: 
 
   // paramters 
   //(TODO: Some model parameters might need to vary over time...)
-  float dt = 0.01;
   float sigma_proc = 1.0; 
   float sigma_meas = 1.0; 
 
-  float g = 9.81; 
-
+  float dt = 0.01;
+ 
   float m = 1; 
   float k = 25; 
   float l0 = 1; 
 
-  float leq = l0 - m*g/k; 
+  float leq = l0 - m*9.81/k; 
   float w = sqrt(k/m);
 
 
   // Motion-Model 1 : 1D Constant velocity 
   KalmanFilter_1D model1D_1(1,1);  
+  model1D_1.set_model_parameters(dt, 9.81, -1, 0); 
+  model1D_1.update_process_model(); 
+  model1D_1.initialize_noise(sigma_proc, sigma_proc, sigma_meas); 
 
-  model1D_1.F << 1.0, dt, 0.0, 1.0;
-  model1D_1.Q << sigma_proc, 0, 0, sigma_proc; 
-  model1D_1.R = sigma_meas; 
 
-/*
   // Motion-Model 2 : 1D Ballistic 
   KalmanFilter_1D model1D_2(2,1); 
-
-  model1D_2.F << 1.0, dt, 0.0, 1.0;
-  model1D_2.u << -g*0.5*dt*dt, -g*dt; 
-  model1D_2.Q << sigma_proc, 0, 0, sigma_proc; 
-  model1D_2.R = sigma_meas;
+  model1D_2.set_model_parameters(dt, 9.81, -1, 0);
+  model1D_2.update_process_model(); 
+  model1D_2.initialize_noise(sigma_proc, sigma_proc, sigma_meas); 
 
   // Motion-Model 3: 1D Spring-Mass
   KalmanFilter_1D model1D_3(3,1); 
+  model1D_3.set_model_parameters(dt, 9.81, w, leq);
+  model1D_3.update_process_model(); 
+  model1D_3.initialize_noise(sigma_proc, sigma_proc, sigma_meas); 
 
-  model1D_3.F << cos(w*dt), sin(w*dt)/w, -w*sin(w*dt), cos(w*dt); 
-  model1D_3.u << leq*(1 - cos(w*dt) - sin(w*dt)/w), leq*(1 + w*sin(w*dt) - cos(w*dt));
-  model1D_1.Q << sigma_proc, 0, 0, sigma_proc; 
-  model1D_1.R = sigma_meas;   
-
-*/
   // Callback function(s): ---------------------------------------------------------------------------------
   ros::Subscriber sub1 = n1.subscribe("pose_chatter1", 100, &KalmanFilter_1D::myCb, &model1D_1);
- /* 
   ros::Subscriber sub2 = n2.subscribe("pose_chatter2", 100, &KalmanFilter_1D::myCb, &model1D_2);
   ros::Subscriber sub3 = n3.subscribe("pose_chatter2", 100, &KalmanFilter_1D::myCb, &model1D_3);
-*/
+
   while (ros::ok())
   {
 	  	ros::spinOnce();
