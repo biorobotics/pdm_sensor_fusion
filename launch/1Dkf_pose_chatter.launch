@@ -1,0 +1,10 @@
+<launch>
+
+  <node pkg="pdm_log_data" type="pose_talker" name="pose_talker" output="screen">
+  </node>
+  <node pkg="pdm_sensor_fusion" type="filterer" name="filterer" output="screen">
+  </node>
+  <node pkg="pdm_log_data" type="logger" name="logger" output="screen">
+  </node>
+
+</launch>

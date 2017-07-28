@@ -76,11 +76,10 @@ void KalmanFilter_1D::myCb(const geometry_msgs::PoseWithCovarianceStamped::Const
 	dt_ = z_dt; 
 	update_process_model(); 
 
-
+	/*
 	cout << "Sigma_measurement " << R << endl; 
 	cout << "z_estimatet VO" << msg->pose.covariance[14] << endl;  
-
-
+	*/
 
 	// Local variables (to avoid aliasing):
 	Eigen::Vector2f x_temp;
@@ -127,8 +126,8 @@ void KalmanFilter_1D::myCb(const geometry_msgs::PoseWithCovarianceStamped::Const
 	kf_custom_msg.data.push_back(x(0)); 
 	kf_custom_msg.data.push_back(x(1)); 
 	kf_custom_msg.data.push_back(P(0,0)); 
-	kf_custom_msg.data.push_back(P(1,0)); 
 	kf_custom_msg.data.push_back(P(0,1)); 
+	kf_custom_msg.data.push_back(P(1,0)); 
 	kf_custom_msg.data.push_back(P(1,1));
 	kf_custom_msg.data.push_back(K(0));
 	kf_custom_msg.data.push_back(K(1));
