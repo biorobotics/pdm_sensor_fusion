@@ -21,6 +21,7 @@ public:
 	// Identification & Headers
 	int id_; 							// object id
 	int model_id_; 
+	ros::NodeHandle n_; 
 
 	ros::Publisher pub_pose_;
 	ros::Publisher pub_kfmsg_;
@@ -69,7 +70,7 @@ public:
 	void set_model_parameters(float dt, float g, float w, float leq);
 
 	// Constructor & Destructor
-	KalmanFilter_1D(int model_id, int object_id);
+	KalmanFilter_1D(int model_id, int object_id, ros::NodeHandle n);
 	~KalmanFilter_1D();
 }; 
 

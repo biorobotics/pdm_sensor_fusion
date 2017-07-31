@@ -3,19 +3,19 @@
 using namespace std; 
 
 /// Constructor
-KalmanFilter_1D::KalmanFilter_1D(int model_id, int object_id) 
+KalmanFilter_1D::KalmanFilter_1D(int model_id, int object_id, ros::NodeHandle n) 
 {
 	id_ = object_id; 
 	model_id_ = model_id;
+	n_ = n; 
 
 	// Creation node & publisher
 	string s1 = string("kfpose_m") + to_string(model_id_) + string("_") + to_string(id_); 
 	string s2 = string("kfinfo_m") + to_string(model_id_) + string("_") + to_string(id_);
 	
-	ros::NodeHandle n1_; 
-	ros::NodeHandle n2_; 
-	pub_pose_ 	= n1_.advertise<geometry_msgs::PoseWithCovarianceStamped>(s1, 100);
-	pub_kfmsg_ 	= n2_.advertise<std_msgs::Float32MultiArray>(s2, 100);
+	//ros::NodeHandle n_;
+	pub_pose_ 	= n_.advertise<geometry_msgs::PoseWithCovarianceStamped>(s1, 100);
+	pub_kfmsg_ 	= n_.advertise<std_msgs::Float32MultiArray>(s2, 100);
 
 	// Header initialisations
 	z_info_previous_.seq 	= -1;
